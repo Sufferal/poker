@@ -1,0 +1,3 @@
+.gitignore
+/venv
+/services/products/__pycache__/
