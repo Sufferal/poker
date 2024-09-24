@@ -2,6 +2,19 @@
   {
     "id": 1,
     "username": "admin",
-    "password": "admin"
+    "password": "admin",
+    "balance": 123.34
+  },
+  {
+    "id": 97987,
+    "username": "pleb",
+    "password": "test",
+    "balance": 10000
+  },
+  {
+    "id": 480396,
+    "username": "Money_Maker_007",
+    "password": "royal_flush_777",
+    "balance": 0
   }
 ]
