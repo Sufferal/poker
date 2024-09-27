@@ -1,7 +1,24 @@
 services:
   users:
-    build: .
+    build: 
+      context: ./services/users
+      dockerfile: Dockerfile
     ports:
       - "5000:5000" 
+    environment:
+      - DATABASE_URL=postgresql://admin:qwerty@users-db:5432/db-users
+    depends_on:
+      - users-db
+  
+  users-db: 
+    image: postgres:13
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: db-users
     volumes:
-      - ./data:/app/data
+      - users-db-data:/var/lib/postgresql/data
+      - ./services/users/db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+
+volumes:
+  users-db-data:
