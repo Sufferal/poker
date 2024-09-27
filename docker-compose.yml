@@ -1,4 +1,25 @@
 services:
+  game:
+    build: 
+      context: ./services/game
+      dockerfile: Dockerfile
+    ports:
+      - "5111:5111"
+    environment:
+      - DATABASE_URL=postgresql://admin:qwerty@game-db:5432/db-games
+    depends_on:
+      - game-db
+
+  game-db: 
+    image: postgres:13
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: qwerty
+      POSTGRES_DB: db-games 
+    volumes:
+      - game-db-data:/var/lib/postgresql/data
+      - ./services/game/db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+
   users:
     build: 
       context: ./services/users
@@ -21,4 +42,5 @@ services:
       - ./services/users/db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
 
 volumes:
+  game-db-data:
   users-db-data:
