@@ -17,11 +17,11 @@ def get_users_route():
 def get_user_route(id):
     return get_user(id)
 
-@app.route('/register', methods=['POST'])
+@app.route('/users/register', methods=['POST'])
 def register_user_route():
     return register_user()
 
-@app.route('/login', methods=['POST'])
+@app.route('/users/login', methods=['POST'])
 def authenticate_user_route():
     return authenticate_user()
 

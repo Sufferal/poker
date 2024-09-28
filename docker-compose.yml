@@ -40,6 +40,16 @@ services:
     volumes:
       - users-db-data:/var/lib/postgresql/data
       - ./services/users/db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+  
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "3333:3333"
+    depends_on:
+      - game
+      - users
 
 volumes:
   game-db-data:

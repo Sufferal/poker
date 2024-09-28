@@ -1,3 +1,10 @@
 .gitignore
-/venv
+
+# Services
+/services/games/__pycache__/
+/services/games/venv
 /services/users/__pycache__/
+/services/users/venv
+
+# Gateway
+/gateway/node_modules/
