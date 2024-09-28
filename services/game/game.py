@@ -1,6 +1,7 @@
 from flask import Flask
 import os
 from db.db_query import *
+from utils.poker import deal_cards_all, determine_winner
 
 app = Flask(__name__)
 port = int(os.environ.get('PORT', 5111))
@@ -42,6 +43,14 @@ def get_games_route():
 @app.route("/games/<int:id>", methods=["GET"])
 def get_game_route(id):
   return get_game(id)
+
+@app.route("/games/<int:id>/deal-cards", methods=["GET"])
+def deal_cards_route(id):
+  return deal_cards(id, deal_cards_all)
+
+@app.route("/games/<int:id>/find-winner", methods=["POST"])
+def find_winner_route(id):
+  return find_winner(id, determine_winner)
 
 if __name__ == "__main__":
   app.run(debug=True, host="0.0.0.0", port=port)

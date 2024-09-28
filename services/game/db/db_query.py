@@ -221,3 +221,84 @@ def get_game(game_id):
         return jsonify({'error': 'Game not found'}), 404
 
     return jsonify(game)
+
+def deal_cards(game_id, deal_cards_all):
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute('SELECT * FROM games WHERE game_id = %s;', (game_id,))
+    game = cursor.fetchone()
+
+    if game is None:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Game not found'}), 404
+
+    # Get the lobby associated with the game
+    cursor.execute('SELECT * FROM lobbies WHERE lobby_id = %s;', (game['lobby_id'],))
+    lobby = cursor.fetchone()
+
+    if lobby is None:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Lobby not found'}), 404
+
+    players = lobby['players']
+    num_players = len(players)
+
+    if num_players < 2:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Not enough players to deal cards'}), 400
+
+    # Deal cards
+    result = deal_cards_all(num_players) 
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({
+        'message': 'Cards dealt successfully', 
+        'cards': result
+    }), 200
+
+def find_winner(game_id, determine_winner):
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute('SELECT * FROM games WHERE game_id = %s;', (game_id,))
+    game = cursor.fetchone()
+
+    if game is None:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Game not found'}), 404
+
+    # Get the lobby associated with the game
+    cursor.execute('SELECT * FROM lobbies WHERE lobby_id = %s;', (game['lobby_id'],))
+    lobby = cursor.fetchone()
+
+    if lobby is None:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Lobby not found'}), 404
+
+    players = lobby['players']
+    num_players = len(players)
+
+    if num_players < 2:
+        cursor.close()
+        conn.close()
+        return jsonify({'error': 'Not enough players to determine winner'}), 400
+
+    # Determine the winner
+    cards = request.json.get('cards')
+    result = determine_winner(cards)
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({
+        'winner': result['winner'],
+        'hands': result['hands']
+    }), 200 
