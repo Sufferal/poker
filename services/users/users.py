@@ -1,6 +1,6 @@
 from flask import Flask
 import os
-from db.db_query import get_users, get_user, register_user, authenticate_user, update_balance
+from db.db_query import get_users, get_user, register_user, authenticate_user, update_balance, delete_user
 
 app = Flask(__name__)
 port = int(os.environ.get('PORT', 5000))
@@ -9,11 +9,11 @@ port = int(os.environ.get('PORT', 5000))
 def home():
     return "Hello from User Management Microservice!"
 
-@app.route('/users')
+@app.route('/users', methods=['GET'])
 def get_users_route():
     return get_users()
 
-@app.route('/users/<int:id>')
+@app.route('/users/<int:id>', methods=['GET'])
 def get_user_route(id):
     return get_user(id)
 
@@ -29,5 +29,9 @@ def authenticate_user_route():
 def update_balance_route(id):
     return update_balance(id)
 
+@app.route('/users/<int:id>', methods=['DELETE'])
+def delete_user_route(id):
+    return delete_user(id)
+
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=port)
+  app.run(debug=True, host="0.0.0.0", port=port)

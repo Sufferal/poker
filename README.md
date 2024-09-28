@@ -17,9 +17,50 @@ git clone https://github.com/Sufferal/poker.git
 docker compose up --build -d
 ```
 3. Access the endpoints. For more endpoints, check Postman collections.
-- User Service
-  - (All Users) - [http://localhost:5000/users](http://localhost:5000/users)
-  - (User by ID) - [http://localhost:5000/users/1](http://localhost:5000/users/1)
+- **Game Service (Lobby + Game)**
+  - Create a lobby - [http://localhost:5111/lobby/create](http://localhost:5111/lobby/create)
+    - Request Body
+    ```json
+    {
+      "host_id": 1,
+      "max_players": 2,
+      "buy_in": 1000
+    }
+    ```
+  - Join a lobby - [http://localhost:5111/lobby/1/join](http://localhost:5111/lobby/1/join)
+    - Request Body
+    ```json
+    {
+      "user_id": 2
+    }
+    ```
+  - All Games - [http://localhost:5111/games](http://localhost:5111/games)
+  - Game by ID - [http://localhost:5111/games/1](http://localhost:5111/games/1)
+  - Deal cards to all players - [http://localhost:5111/games/1/deal-cards](http://localhost:5111/games/1/deal-cards)
+  - Determine winner - [http://localhost:5111/games/1/find-winner](http://localhost:5111/games/1/find-winner)
+    - Request Body (*this is a general overview of the request body, check the Postman collection for more details*)
+    ```json
+    {
+      "cards": {
+        "flop": ["card_1", "card_2", "card_3"],
+        "turn": "card_4",
+        "river": "card_5",
+        "players": [
+          {
+            "id": 1,
+            "cards": ["card_6", "card_7"]
+          },
+          {
+            "id": 2,
+            "cards": ["card_8", "card_9"]
+          }
+        ]
+      }
+    }
+    ```
+- **User Service**
+  - All Users - [http://localhost:5000/users](http://localhost:5000/users)
+  - User by ID - [http://localhost:5000/users/1](http://localhost:5000/users/1)
 4. If you want to delete all containers, networks, volumes, images, run the following command in the root directory. If you want to remove the volumes as well, add the `--volumes` or `-v` flag.
 ```bash
 docker compose down

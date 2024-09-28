@@ -94,3 +94,18 @@ def update_balance(id):
     conn.close()
 
     return jsonify({'message': 'Balance updated successfully'}), 200
+
+def delete_user(id):
+    conn = get_db_connection()
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute('SELECT * FROM users WHERE id = %s;', (id,))
+    user = cursor.fetchone()
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    cursor.execute('DELETE FROM users WHERE id = %s;', (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({'message': 'User deleted successfully'}), 200
