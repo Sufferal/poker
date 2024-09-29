@@ -1,5 +1,6 @@
-from flask import Flask
+from flask import Flask, jsonify
 import os
+import redis
 from db.db_query import *
 from db.db_check import *
 from datetime import datetime
@@ -7,6 +8,10 @@ from utils.poker import deal_cards_all, determine_winner
 
 app = Flask(__name__)
 port = int(os.environ.get('PORT', 5111))
+
+# Redis
+redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+redis_client = redis.StrictRedis.from_url(redis_url)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -58,7 +63,23 @@ def get_game_route(id):
 
 @app.route("/games/<int:id>/deal-cards", methods=["GET"])
 def deal_cards_route(id):
-  return deal_cards(id, deal_cards_all)
+  ignore_cache = request.args.get('ignore_cache', 'false').lower() == 'true'
+  cache_key = f"game:{id}:dealt_cards"
+
+  if not ignore_cache:
+    cached_dealt_cards = redis_client.get(cache_key)
+    if cached_dealt_cards:
+      return jsonify({
+        'message': 'Cards dealt successfully (from cache)', 
+        'cards': json.loads(cached_dealt_cards)
+      }), 200
+
+  response, status_code = deal_cards(id, deal_cards_all)
+  if status_code == 200:
+    result_data = response.get_json()
+    redis_client.set(cache_key, json.dumps(result_data['cards']))
+
+  return response, status_code
 
 @app.route("/games/<int:id>/find-winner", methods=["POST"])
 def find_winner_route(id):

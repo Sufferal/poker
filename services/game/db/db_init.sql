@@ -11,5 +11,6 @@ CREATE TABLE IF NOT EXISTS games (
     game_id SERIAL PRIMARY KEY,
     lobby_id INTEGER NOT NULL,
     winner_id INTEGER,
+    dealt_cards JSONB,
     FOREIGN KEY (lobby_id) REFERENCES lobbies(lobby_id)
 );
