@@ -1,6 +1,8 @@
 from flask import Flask
 import os
 from db.db_query import *
+from db.db_check import *
+from datetime import datetime
 from utils.poker import deal_cards_all, determine_winner
 
 app = Flask(__name__)
@@ -9,6 +11,16 @@ port = int(os.environ.get('PORT', 5111))
 @app.route("/", methods=["GET"])
 def home():
   return "Hello from Game Management Microservice!"
+
+@app.route('/status', methods=['GET'])
+def status():
+  db_status = 'connected' if check_db_connection() else 'disconnected'
+  return jsonify({
+    'status': 'Game service is running',
+    'version': '1.0.0',
+    'time': datetime.now().isoformat(),
+    'database': db_status
+  }), 200
 
 # Lobbies
 @app.route("/lobby", methods=["GET"])
