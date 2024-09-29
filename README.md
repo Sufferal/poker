@@ -61,6 +61,26 @@ docker compose up --build -d
 - **User Service**
   - All Users - [http://localhost:5000/users](http://localhost:5000/users)
   - User by ID - [http://localhost:5000/users/1](http://localhost:5000/users/1)
+- **Gateway**
+  - All lobbies - [http://localhost:3333/lobby](http://localhost:3333/lobby)
+  - Join a lobby - [http://localhost:3333/lobby/1/join](http://localhost:3333/lobby/1/join)
+  - Leave a lobby - [http://localhost:3333/lobby/1/leave](http://localhost:3333/lobby/1/leave)
+  - Register a user - [http://localhost:3333/users/register](http://localhost:3333/users/register)
+    - Request Body
+    ```json
+    {
+      "username": "Michelangelo",
+      "password": "David"
+    }
+    ```
+  - Login a user - [http://localhost:3333/users/login](http://localhost:3333/users/login)
+    - Request Body
+    ```json
+    {
+      "username": "admin",
+      "password": "test"
+    }
+    ```
 4. If you want to delete all containers, networks, volumes, images, run the following command in the root directory. If you want to remove the volumes as well, add the `--volumes` or `-v` flag.
 ```bash
 docker compose down
