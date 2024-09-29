@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from db.db_query import *
 from db.db_check import *
+import time
 
 app = Flask(__name__)
 port = int(os.environ.get('PORT', 5000))
@@ -35,6 +36,7 @@ def register_user_route():
 
 @app.route('/users/login', methods=['POST'])
 def authenticate_user_route():
+  time.sleep(10)
   return authenticate_user()
 
 @app.route('/users/<int:id>/balance', methods=['PATCH'])
