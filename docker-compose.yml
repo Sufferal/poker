@@ -6,22 +6,20 @@ services:
     ports:
       - "5111:5111"
     environment:
-      - DATABASE_URL=postgresql://admin:qwerty@game-db:5432/db-games
-      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=${DATABASE_URL_GAME}
+      - REDIS_URL=${REDIS_URL}
     depends_on:
       - game-db
       - redis
-
   game-db: 
     image: postgres:13
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: qwerty
-      POSTGRES_DB: db-games 
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_GAMES}
     volumes:
       - game-db-data:/var/lib/postgresql/data
       - ./services/game/db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
-
   users:
     build: 
       context: ./services/users
@@ -29,16 +27,16 @@ services:
     ports:
       - "5000:5000" 
     environment:
-      - DATABASE_URL=postgresql://admin:qwerty@users-db:5432/db-users
+      - DATABASE_URL=${DATABASE_URL_USERS}
     depends_on:
       - users-db
   
   users-db: 
     image: postgres:13
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: qwerty
-      POSTGRES_DB: db-users
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_USERS}
     volumes:
       - users-db-data:/var/lib/postgresql/data
       - ./services/users/db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
