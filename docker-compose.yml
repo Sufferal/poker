@@ -7,8 +7,10 @@ services:
       - "5111:5111"
     environment:
       - DATABASE_URL=postgresql://admin:qwerty@game-db:5432/db-games
+      - REDIS_URL=redis://redis:6379/0
     depends_on:
       - game-db
+      - redis
 
   game-db: 
     image: postgres:13
@@ -50,6 +52,11 @@ services:
     depends_on:
       - game
       - users
+  
+  redis:
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
 
 volumes:
   game-db-data:

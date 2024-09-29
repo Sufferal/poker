@@ -81,6 +81,9 @@ docker compose up --build -d
       "password": "test"
     }
     ```
+- **Cache**
+  - Deal cards to all players - [http://localhost:5111/games/1/deal-cards](http://localhost:5111/games/1/deal-cards)
+  - If you want to deal new cards, you can ignore the cache by adding the `ignore_cache` query parameter. - [http://localhost:5111/games/1/deal-cards?ignore_cache=true](http://localhost:5111/games/1/deal-cards?ignore_cache=true)
 4. If you want to delete all containers, networks, volumes, images, run the following command in the root directory. If you want to remove the volumes as well, add the `--volumes` or `-v` flag.
 ```bash
 docker compose down

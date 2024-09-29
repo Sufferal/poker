@@ -191,7 +191,12 @@ def delete_lobby(lobby_id):
         conn.close()
         return jsonify({'error': 'Lobby not found'}), 404
 
+    # Delete the game associated with the lobby
+    cursor.execute('DELETE FROM games WHERE lobby_id = %s;', (lobby_id,))
+
+    # Delete the lobby
     cursor.execute('DELETE FROM lobbies WHERE lobby_id = %s;', (lobby_id,))
+    
     conn.commit()
     cursor.close()
     conn.close()
@@ -252,6 +257,9 @@ def deal_cards(game_id, deal_cards_all):
 
     # Deal cards
     result = deal_cards_all(num_players) 
+
+    # Store the dealt cards in the games table
+    cursor.execute('UPDATE games SET dealt_cards = %s WHERE game_id = %s;', (json.dumps(result), game_id))
 
     conn.commit()
     cursor.close()

@@ -70,7 +70,8 @@ def print_deck(deck=STANDARD_DECK, print_by_suit=False):
       print()
 
 # Function to deal cards to all players
-def deal_cards_all(num_players, deck=STANDARD_DECK):
+def deal_cards_all(num_players):
+    deck = generate_deck()
     shuffled_deck = shuffle_deck(deck)
     players = {f"player_{i+1}": [shuffled_deck.pop(), shuffled_deck.pop()] for i in range(num_players)}
     flop = [shuffled_deck.pop() for _ in range(3)]
@@ -154,7 +155,7 @@ if __name__ == "__main__":
     deck = generate_deck()
 
     print("\nDealing cards...")
-    # game = deal_cards_all(6, deck)
+    # game = deal_cards_all(6)
 
     game = {
       "flop": [
