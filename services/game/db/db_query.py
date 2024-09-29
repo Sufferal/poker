@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask import jsonify, request
 import json
+import requests
 
 def get_db_connection():
   return psycopg2.connect(
@@ -23,39 +24,63 @@ def get_lobbies():
     return jsonify(lobbies)
 
 def create_lobby():
-    host_id = request.json.get('host_id')
-    max_players = request.json.get('max_players')
-    buy_in = request.json.get('buy_in')
+  host_id = request.json.get('host_id')
+  max_players = request.json.get('max_players')
+  buy_in = request.json.get('buy_in')
 
-    if not isinstance(host_id, int):
-        return jsonify({'error': 'host_id must be an integer'}), 400
+  if not isinstance(host_id, int):
+      return jsonify({'error': 'host_id must be an integer'}), 400
 
-    if not isinstance(max_players, int):
-        return jsonify({'error': 'max_players must be an integer'}), 400
+  if not isinstance(max_players, int):
+      return jsonify({'error': 'max_players must be an integer'}), 400
 
-    if not isinstance(buy_in, (int, float)):
-        return jsonify({'error': 'buy_in must be a number'}), 400
+  if not isinstance(buy_in, (int, float)):
+      return jsonify({'error': 'buy_in must be a number'}), 400
 
-    players = [{'user_id': host_id}]
+  # Verify user_id with the users service
+  USER_SERVICE_URL = f'http://users:5000/users/{host_id}'
+  response = requests.get(USER_SERVICE_URL)
 
-    conn = get_db_connection()
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute(
-        'INSERT INTO lobbies (host_id, max_players, buy_in, players, status) VALUES (%s, %s, %s, %s, %s) RETURNING lobby_id;',
-        (host_id, max_players, buy_in, json.dumps(players), 'waiting')
-    )
-    lobby_id = cursor.fetchone()['lobby_id']
-    conn.commit()
-    cursor.close()
-    conn.close()
+  if response.status_code != 200:
+      return jsonify({'error': 'User not found with such id'}), 404
 
-    return jsonify({'message': 'Lobby created successfully', 'lobby_id': lobby_id}), 201
+  conn = get_db_connection()
+  cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+  # Check if the host already has an existing lobby
+  cursor.execute('SELECT * FROM lobbies WHERE host_id = %s AND status = %s;', (host_id, 'waiting'))
+  existing_lobby = cursor.fetchone()
+
+  if existing_lobby:
+      cursor.close()
+      conn.close()
+      return jsonify({'error': 'Host already has an existing lobby'}), 400
+
+  players = [{'user_id': host_id}]
+
+  cursor.execute(
+      'INSERT INTO lobbies (host_id, max_players, buy_in, players, status) VALUES (%s, %s, %s, %s, %s) RETURNING lobby_id;',
+      (host_id, max_players, buy_in, json.dumps(players), 'waiting')
+  )
+  lobby_id = cursor.fetchone()['lobby_id']
+  conn.commit()
+  cursor.close()
+  conn.close()
+
+  return jsonify({'message': 'Lobby created successfully', 'lobby_id': lobby_id}), 201
 
 def join_lobby(lobby_id):
     user_id = request.json.get('user_id')
 
     if not isinstance(user_id, int):
         return jsonify({'error': 'user_id must be an integer'}), 400
+    
+    # Verify user_id with the users service
+    user_service_url = f'http://users:5000/users/{user_id}'
+    response = requests.get(user_service_url)
+    
+    if response.status_code != 200:
+      return jsonify({'error': 'User not found with such id'}), 404
 
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -104,6 +129,13 @@ def leave_lobby(lobby_id):
 
     if not isinstance(user_id, int):
         return jsonify({'error': 'user_id must be an integer'}), 400
+
+    # Verify user_id with the users service
+    user_service_url = f'http://users:5000/users/{user_id}'
+    response = requests.get(user_service_url)
+    
+    if response.status_code != 200:
+      return jsonify({'error': 'User not found with such id'}), 404
 
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=RealDictCursor)
