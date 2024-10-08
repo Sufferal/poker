@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_socketio import SocketIO, send, emit
 import os
 import redis
 from db.db_query import *
@@ -7,6 +8,7 @@ from datetime import datetime
 from utils.poker import deal_cards_all, determine_winner
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 port = int(os.environ.get('PORT', 5111))
 
 # Redis
@@ -85,5 +87,21 @@ def deal_cards_route(id):
 def find_winner_route(id):
   return find_winner(id, determine_winner)
 
+@socketio.on('connect')
+def handle_connect():
+  send("Connected to the websocket server")
+
+@socketio.on('bet')
+def handle_bet(data):
+  emit('bet', f"Player with id {data['id']} did a bet of {data['amount']}", broadcast=True)
+
+@socketio.on('fold')
+def handle_fold(data):
+  emit('fold', f"Player with id {data['id']} folded", broadcast=True)
+
+@socketio.on('message')
+def handle_message(message):
+  send(f"Message: {message}")
+
 if __name__ == "__main__":
-  app.run(debug=True, host="0.0.0.0", port=port)
+  socketio.run(app, debug=True, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
