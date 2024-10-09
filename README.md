@@ -58,6 +58,44 @@ docker compose up --build -d
       }
     }
     ```
+- **Websockets**
+  - Connect to the websocket - [ws://localhost:5111](ws://localhost:5111)
+  - Send a message to the websocket that is going to be broadcasted to all players in the lobby
+    - Join a lobby (request body)
+    ```json
+    {
+      "username": "Mary", 
+      "lobby": 1,  
+    }
+    ```
+    - Response 
+    ```text
+    Mary has entered the lobby with the id 1
+    ```
+    - Make a bet (request body)
+    ```json
+    {
+      "username": "Mary", 
+      "lobby": 1, 
+      "bet": 450
+    }
+    ```
+    - Response 
+    ```text
+    Player Mary bet 450
+    ```
+    - Fold the hand (request body)
+    ```json
+    {
+      "username": "Mary", 
+      "lobby": 1
+    }
+    ```
+    - Response 
+    ```text
+    Player Mary folded
+    ```
+
 - **User Service**
   - All Users - [http://localhost:5000/users](http://localhost:5000/users)
   - User by ID - [http://localhost:5000/users/1](http://localhost:5000/users/1)
