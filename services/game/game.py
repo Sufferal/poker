@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from flask_socketio import SocketIO, send, emit
+from flask_socketio import SocketIO, send, emit, join_room, leave_room
 import os
 import redis
 from db.db_query import *
@@ -8,7 +8,7 @@ from datetime import datetime
 from utils.poker import deal_cards_all, determine_winner
 
 app = Flask(__name__)
-socketio = SocketIO(app)
+socketio = SocketIO(app) # For debugging purposes use logger=True and engineio_logger=True
 port = int(os.environ.get('PORT', 5111))
 
 # Redis
@@ -87,21 +87,71 @@ def deal_cards_route(id):
 def find_winner_route(id):
   return find_winner(id, determine_winner)
 
+
+# ================================== Websocket ================================== 
+# Connection, message and disconnection
 @socketio.on('connect')
 def handle_connect():
-  send("Connected to the websocket server")
-
-@socketio.on('bet')
-def handle_bet(data):
-  emit('bet', f"Player with id {data['id']} did a bet of {data['amount']}", broadcast=True)
-
-@socketio.on('fold')
-def handle_fold(data):
-  emit('fold', f"Player with id {data['id']} folded", broadcast=True)
+  # Request SID (socket id) is the unique identifier for the client
+  send(f"{request.sid} connected to the Websocket server!")
 
 @socketio.on('message')
 def handle_message(message):
   send(f"Message: {message}")
+
+@socketio.on('disconnect')
+def handle_disconnect():
+  send(f"{request.sid} disconnected from the Websocket server!")
+
+# Lobby actions
+@socketio.on('join')
+def on_join(data):
+  username = data['username']
+  lobby = str(data['lobby']) 
+
+  join_room(lobby)
+  send(username + ' has entered the lobby with the id ' + lobby, to=lobby)
+
+@socketio.on('leave')
+def on_leave(data):
+  username = data['username']
+  lobby = str(data['lobby'])
+
+  send(username + ' has left the lobby with the id ' + lobby, to=lobby)
+  leave_room(lobby)
+
+# Game actions
+@socketio.on('bet')
+def handle_bet(data):
+  username = data['username']
+  lobby = str(data['lobby'])
+  amount = data['amount']
+
+  emit('bet', f"Player {username} bet {amount}", to=lobby)
+
+@socketio.on('call')
+def handle_call(data):
+  username = data['username']
+  lobby = str(data['lobby'])
+  amount = data['amount']
+
+  emit('call', f"Player {username} called {amount}", to=lobby)
+
+@socketio.on('raise')
+def handle_raise(data):
+  username = data['username']
+  lobby = str(data['lobby'])
+  amount = data['amount']
+  current_bet = data['current_bet']
+
+  emit('raise', f"Player {username} raised to {amount} from {current_bet}", to=lobby)
+
+@socketio.on('fold')
+def handle_fold(data):
+  username = data['username']
+  lobby = str(data['lobby'])
+
+  emit('fold', f"Player {username} folded", to=lobby)
 
 if __name__ == "__main__":
   socketio.run(app, debug=True, host="0.0.0.0", port=port, allow_unsafe_werkzeug=True)
