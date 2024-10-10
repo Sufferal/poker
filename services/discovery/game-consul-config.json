@@ -1,0 +1,14 @@
+{
+  "service": {
+    "name": "Game",
+    "port": 5111,
+    "tags": ["game"],
+    "check": {
+      "id": "game-health",
+      "name": "Game Service Health Status",
+      "http": "http://game:5111/status",
+      "method": "GET",
+      "interval": "10s"
+    } 
+  }
+}
