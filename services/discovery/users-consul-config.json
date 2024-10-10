@@ -1,0 +1,14 @@
+{
+  "service": {
+    "name": "User",
+    "port": 5000,
+    "tags": ["users"],
+    "check": {
+      "id": "users-health",
+      "name": "Users Service Health Status",
+      "http": "http://users:5000/status",
+      "method": "GET",
+      "interval": "10s"
+    } 
+  }
+}

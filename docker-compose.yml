@@ -1,4 +1,12 @@
 services:
+  consul:
+    build:
+      context: ./services/discovery
+      dockerfile: Dockerfile
+    ports:
+      - "8500:8500"
+    command: "agent -dev -client=0.0.0.0"
+
   game:
     build: 
       context: ./services/game
@@ -20,6 +28,7 @@ services:
     volumes:
       - game-db-data:/var/lib/postgresql/data
       - ./services/game/db/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+
   users:
     build: 
       context: ./services/users
@@ -30,7 +39,6 @@ services:
       - DATABASE_URL=${DATABASE_URL_USERS}
     depends_on:
       - users-db
-  
   users-db: 
     image: postgres:13
     environment:
@@ -54,7 +62,7 @@ services:
   redis:
     image: redis:6-alpine
     ports:
-      - "6379:6379"
+      - "6379:6379"  
 
 volumes:
   game-db-data:
